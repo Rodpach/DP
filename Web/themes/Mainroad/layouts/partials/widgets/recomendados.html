@@ -1,0 +1,18 @@
+{{- if or .Site.Params.widgets.recomendados_uno .Site.Params.widgets.recomendados_dos }}
+<div class="widget-recomendados widget">
+	<h4 class="widget-recomendados__title widget__title">Sitios recomendados</h4>
+	<div class="widget-recomendados__content widget__content">
+		{{- with .Site.Params.widgets.recomendados_uno }}
+		<div class="widget-recomendados__item widget__item">
+			<a class="widget-recomendados__link widget__link btn" title="recomendados_uno" rel="noopener noreferrer" href="https://soundcloud.com/{{ . }}" target="_blank">
+			  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+				<span>¡Podcast: Historias Cienciacionales!</span>
+			</a>
+		</div>
+		{{ end -}}
+	  {{- with .Site.Params.widgets.recomendados_dos }}
+		<div class="widget-recomendados__item widget__item">
+			<a class="widget-recomendados__link widget__link btn" title="recomendados1" rel="noopener noreferrer" href="http://www.iies.unam.mx/laboratorios/ecologia-funcional/?page_id=23" target="_blank">
+				<span>Laboratorio de Ecología Funcional, IEES, UNAM.</span>
+			</a>
+		</div>

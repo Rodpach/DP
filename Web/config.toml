@@ -1,0 +1,44 @@
+baseurl = "/"
+title = "DataPach"
+languageCode = "en-us"
+paginate = "5" # Number of posts per page
+theme = "mainroad"
+disqusShortname = "" # Enable comments by entering your Disqus shortname
+googleAnalytics = "" # Enable Google Analytics by entering your tracking id
+
+[Author]
+    name = "Rodrigo Pacheco"
+    bio = "Rodrigo realiza su posgrado sobre Ecología Urbana en el Laboratorio de Ecología Funcional, IIES, UNAM. Es apasionado a la programación en R, la ciencia de datos, la estadíctica, los SIGs y la comunicación de la Ciencia."
+    avatar = "/img/rodpach.jpg"
+
+[[menu.main]]
+  name = "Home"
+  url = "/"
+  weight = 1
+
+[[menu.main]]
+  name = "About"
+  url = "/about/"
+  weight = 2
+  
+
+
+[Params]
+    subtitle = "Ciencia de datos, ecología y curiosidades" # Subtitle of your site
+    description = "DataPach es un espacio pensado para comunicar algunos resultados de mis trabajos y prácticas, usando herramientas como el lenguaje R, QGIS y Shiny. También es un espacio para compartir mi perspectiva en la ciencia de datos, la ecología, y de los beneficios de usar y adaptar estas herramientas en nuestra sociedad y en las ciencias biológicas." # Description of your site
+    opengraph = true
+    readmore = false # Show "Read more" button in list if true
+    leftsidebar = false # Move sidebar to the left side if true
+    authorbox = true
+    post_navigation = true
+    postSections = ["post"]
+
+[Params.widgets]
+    search = true # Enable "Search" widget
+    recent_articles = true # Enable "Recent arcticles" widget
+    categories = true # Enable "Categories" widget
+    tags = true # Enable "Tags" widget
+    tags_counter = false # Enable counter for each tag in "Tags" widget (disabled by default)
+    social_twitter = "www.twitter.com/pachecovv"
+    social_instagram = "pachecovv"
+    recomendados_uno = "historias-cienciacionales"

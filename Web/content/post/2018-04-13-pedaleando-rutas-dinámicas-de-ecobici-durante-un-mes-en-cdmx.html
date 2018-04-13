@@ -1,0 +1,1574 @@
+---
+title: 'Pedaleando: Rutas dinámicas de ecobici durante un mes en CDMX'
+author: Rodrigo Pacheco
+date: '2018-04-13'
+slug: pedaleando-rutas-dinámicas-de-ecobici-durante-un-mes-en-cdmx
+categories:
+  - Ecobici
+  - CDMX
+  - Shiny
+  - Leaflet
+tags:
+  - Ecobici
+  - CDMX
+  - Bicicleta
+  - R
+  - Shiny
+  - Leaflet
+  - Gif
+description: ''
+thumbnail: 'img/ecobici.jpg'
+---
+
+
+
+<p>
+Transportarse por las vialidades de la Ciudad de México a veces parece ser una pesadilla, pues existe un uso desmedido del auto y la desorganización general en la movilización pareciera que está llegando a su límite: desde el metro, hasta las vialidades para camiones y autos privados. En ciudades con problemas similares, cada vez es más evidente que promocionar la bicicleta es el rumbo que está funcionando y tomando el S. XXI. Además, algunas ciudades cuentan con servicios públicos de bicicleta que producen datos públicos, y su análisis pueden ayudarnos a entender, mejorar y expandir el servicio, al permitirnos conocer las vialidades y áreas de la ciudad, así como los tiempos y la demografía que hace uso de este servicio.
+</p>
+<p>
+Un esfuerzo en la Ciudad de México de fomentar el uso de la bicicleta, y contar con un buen registro de su uso, es el programa de Ecobici. Este programa inicio desde 2010 y su uso a ha ido incrementado a la par de su expansión, con menos de 10,000 usuarios por día en su primer año, hasta alcanzar más de 30,000 usuarios al día, desde el 2015 y hasta el día de hoy, con 452 estaciones y cubriendo 32 km2. El programa de Ecobici cuenta con un acervo de datos abiertos que es accesible a través de su <a href="https://www.ecobici.cdmx.gob.mx/es">portal oficial</a> y a través de su API para datos en vivo.
+</p>
+<p>
+Como ciclista y analista de datos, entender cómo se usa la bicicleta en la ciudad de México resulta un reto complejo y fascinante. Además, la facilidad con la que se puede tener acceso a los datos es algo que hay que reconocerle a Ecobici y el <a href="http://labcd.mx/labforthecity/">Laboratorio de la Ciudad de México</a>. No obstante, también es una gran oportunidad para fomentar un mayor uso de la bicicleta y compartir mi visión en cómo podríamos mejorar el servicio, a través de herramientas que faciliten la extracción de información de los datos y que, tanto gobierno como sociedad, tomen decisiones informadas con base en evidencia de datos.
+</p>
+<div id="los-datos-de-bicis" class="section level1">
+<h1>Los datos de bicis</h1>
+<p>
+Para comenzar la aventura por entender las rutas, la demografía y los horarios de los usuarios de Ecobici en la Ciudad de México, primero tenía que ver con que datos contaba. Como anteriormente mencioné, en su portal me encontré que Ecobici puede darte datos en vivo, por medio de su API, y por cada mes, por descarga en su <a href="https://www.ecobici.cdmx.gob.mx/es/informacion-del-servicio/open-data">portal oficial</a>. Me fui con la segunda opción y por solo un mes: junio de 2017. La razón, por ahora, es el poder trabajar con una buena muestra representativa y que el código se pueda extrapolar. También hay algo de poderlos trabajar en mi laptop y no requerir de mucho hardware.
+</p>
+<p>
+El archivo cuenta con buenos detalles:
+</p>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped table-hover table-condensed table-responsive" style="font-size: 8px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-2">Table 1: </span>Datos de viajes de ecobici en junio de 2017
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Genero_Usuario
+</th>
+<th style="text-align:right;">
+Edad_Usuario
+</th>
+<th style="text-align:right;">
+Bici
+</th>
+<th style="text-align:right;">
+Ciclo_Estacion_Retiro
+</th>
+<th style="text-align:left;">
+Fecha_Retiro
+</th>
+<th style="text-align:left;">
+Hora_Retiro
+</th>
+<th style="text-align:right;">
+Ciclo_Estacion_Arribo
+</th>
+<th style="text-align:left;">
+Fecha_Arribo
+</th>
+<th style="text-align:left;">
+Hora_Arribo
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+9287
+</td>
+<td style="text-align:right;">
+449
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:00:14
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:13:57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+9379
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:00:32
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:03:55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+2365
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:01:24
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:10:04
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+7931
+</td>
+<td style="text-align:right;">
+65
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:01:45
+</td>
+<td style="text-align:right;">
+73
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:29:44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+8512
+</td>
+<td style="text-align:right;">
+384
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:01:51
+</td>
+<td style="text-align:right;">
+299
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:19:40
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+2812
+</td>
+<td style="text-align:right;">
+340
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:02:11
+</td>
+<td style="text-align:right;">
+349
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:15:30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+9888
+</td>
+<td style="text-align:right;">
+190
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:02:20
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:12:19
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+9804
+</td>
+<td style="text-align:right;">
+363
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:02:34
+</td>
+<td style="text-align:right;">
+276
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:26:22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+7522
+</td>
+<td style="text-align:right;">
+231
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:03:02
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:32:48
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+10049
+</td>
+<td style="text-align:right;">
+401
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:03:43
+</td>
+<td style="text-align:right;">
+401
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:07:03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+9468
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:04:32
+</td>
+<td style="text-align:right;">
+172
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:12:42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+1907
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:11
+</td>
+<td style="text-align:right;">
+79
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:29:36
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+2571
+</td>
+<td style="text-align:right;">
+74
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:22
+</td>
+<td style="text-align:right;">
+79
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:29:25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+F
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+2091
+</td>
+<td style="text-align:right;">
+225
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:38
+</td>
+<td style="text-align:right;">
+255
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:18:00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+3962
+</td>
+<td style="text-align:right;">
+257
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:40
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:11:55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+63
+</td>
+<td style="text-align:right;">
+7985
+</td>
+<td style="text-align:right;">
+246
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:48
+</td>
+<td style="text-align:right;">
+246
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:33:44
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+8071
+</td>
+<td style="text-align:right;">
+136
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:53
+</td>
+<td style="text-align:right;">
+133
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:10:59
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+2967
+</td>
+<td style="text-align:right;">
+175
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:05:55
+</td>
+<td style="text-align:right;">
+173
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:11:32
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+2200
+</td>
+<td style="text-align:right;">
+221
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:06:01
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:20:56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+M
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+3834
+</td>
+<td style="text-align:right;">
+116
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:06:03
+</td>
+<td style="text-align:right;">
+264
+</td>
+<td style="text-align:left;">
+01/06/2017
+</td>
+<td style="text-align:left;">
+00:10:46
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>
+</p>
+<p>
+De izquierda a derecha, vemos que sus datos proporcionan el género (Femenino o masculino), la edad, el número de bici, donde la toman, que día y a que hora la toman, donde la dejan y, que día y a que hora la dejan. En total, ocho variables que acumulan 853,651 viajes que se hicieron en junio.
+</p>
+<p>
+Los datos que proporcionan son un excelente inicio, pero no tiene las coordenadas de las estaciones. Mi idea es que, usando el servicio de ruta de Google, pueda obtener la ruta más probable de estación a estación, junto con la distancia y el tiempo promedio de llegada, y seleccionando mi modo de transporte como bicicleta, como cuando uno lo solicita en el celular o en su página. De esta forma se podrían explorar las rutas de forma dinámica en un mapa de la ciudad. Por ello, para buena de estos datos, la API cuenta con una base de datos de las estaciones, sus coordenadas, sus nombres y cuales están cerca, entre otras cosas:
+</p>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-y: scroll; height:400px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped table-hover table-condensed table-responsive" style="font-size: 8px; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-3">Table 2: </span>Información de estaciones de ecobici CDMX
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+X
+</th>
+<th style="text-align:right;">
+id
+</th>
+<th style="text-align:left;">
+name
+</th>
+<th style="text-align:right;">
+zipCode
+</th>
+<th style="text-align:left;">
+districtCode
+</th>
+<th style="text-align:left;">
+districtName
+</th>
+<th style="text-align:left;">
+stationType
+</th>
+<th style="text-align:right;">
+st1
+</th>
+<th style="text-align:right;">
+st2
+</th>
+<th style="text-align:right;">
+st3
+</th>
+<th style="text-align:right;">
+st4
+</th>
+<th style="text-align:right;">
+lat
+</th>
+<th style="text-align:right;">
+lon
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:left;">
+DR. ANDRADE - ARCOS DE BELÉN
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:right;">
+448
+</td>
+<td style="text-align:right;">
+19.42661
+</td>
+<td style="text-align:right;">
+-99.14447
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+443
+</td>
+<td style="text-align:left;">
+BRUNO TRAVEN-GOLONDRINAS
+</td>
+<td style="text-align:right;">
+3340
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+432
+</td>
+<td style="text-align:right;">
+442
+</td>
+<td style="text-align:right;">
+444
+</td>
+<td style="text-align:right;">
+432
+</td>
+<td style="text-align:right;">
+19.35966
+</td>
+<td style="text-align:right;">
+-99.16202
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+416
+</td>
+<td style="text-align:left;">
+RECREO-PARROQUÍA
+</td>
+<td style="text-align:right;">
+3104
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+390
+</td>
+<td style="text-align:right;">
+391
+</td>
+<td style="text-align:right;">
+415
+</td>
+<td style="text-align:right;">
+390
+</td>
+<td style="text-align:right;">
+19.37131
+</td>
+<td style="text-align:right;">
+-99.17761
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+437
+</td>
+<td style="text-align:left;">
+MORAS-COMUNAL
+</td>
+<td style="text-align:right;">
+3240
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+423
+</td>
+<td style="text-align:right;">
+436
+</td>
+<td style="text-align:right;">
+438
+</td>
+<td style="text-align:right;">
+423
+</td>
+<td style="text-align:right;">
+19.36481
+</td>
+<td style="text-align:right;">
+-99.17602
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+438
+</td>
+<td style="text-align:left;">
+ADOLFO PRIETO-JOSÉ MARÍA OLLOQUI
+</td>
+<td style="text-align:right;">
+3240
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+434
+</td>
+<td style="text-align:right;">
+435
+</td>
+<td style="text-align:right;">
+437
+</td>
+<td style="text-align:right;">
+434
+</td>
+<td style="text-align:right;">
+19.36480
+</td>
+<td style="text-align:right;">
+-99.17458
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+440
+</td>
+<td style="text-align:left;">
+REAL DE MAYORAZGO-PUENTE XOCO
+</td>
+<td style="text-align:right;">
+3330
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+433
+</td>
+<td style="text-align:right;">
+439
+</td>
+<td style="text-align:right;">
+441
+</td>
+<td style="text-align:right;">
+433
+</td>
+<td style="text-align:right;">
+19.36065
+</td>
+<td style="text-align:right;">
+-99.16867
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+347
+</td>
+<td style="text-align:left;">
+PENNSYLVANIA-MAXIMINO AVILA CAMACHO
+</td>
+<td style="text-align:right;">
+3710
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+334
+</td>
+<td style="text-align:right;">
+346
+</td>
+<td style="text-align:right;">
+348
+</td>
+<td style="text-align:right;">
+334
+</td>
+<td style="text-align:right;">
+19.38438
+</td>
+<td style="text-align:right;">
+-99.17610
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+350
+</td>
+<td style="text-align:left;">
+JOSE CLEMENTE OROZCO-CORREGGIO
+</td>
+<td style="text-align:right;">
+3710
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+349
+</td>
+<td style="text-align:right;">
+352
+</td>
+<td style="text-align:right;">
+349
+</td>
+<td style="text-align:right;">
+352
+</td>
+<td style="text-align:right;">
+19.38406
+</td>
+<td style="text-align:right;">
+-99.18148
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+356
+</td>
+<td style="text-align:left;">
+MATIAS ROMERO -ADOLFO PRIETO
+</td>
+<td style="text-align:right;">
+3100
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+357
+</td>
+<td style="text-align:right;">
+372
+</td>
+<td style="text-align:right;">
+355
+</td>
+<td style="text-align:right;">
+19.38129
+</td>
+<td style="text-align:right;">
+-99.17017
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+361
+</td>
+<td style="text-align:left;">
+PORFIRIO DÍAZ-AV. INSURGENTES
+</td>
+<td style="text-align:right;">
+3100
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+354
+</td>
+<td style="text-align:right;">
+369
+</td>
+<td style="text-align:right;">
+370
+</td>
+<td style="text-align:right;">
+354
+</td>
+<td style="text-align:right;">
+19.38045
+</td>
+<td style="text-align:right;">
+-99.17622
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:left;">
+PORFIRIO DÍAZ-CINCINATTI
+</td>
+<td style="text-align:right;">
+3740
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+366
+</td>
+<td style="text-align:right;">
+367
+</td>
+<td style="text-align:right;">
+369
+</td>
+<td style="text-align:right;">
+366
+</td>
+<td style="text-align:right;">
+19.37925
+</td>
+<td style="text-align:right;">
+-99.17934
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+369
+</td>
+<td style="text-align:left;">
+PORFIRIO DÍAZ-AV. INSURGENTES
+</td>
+<td style="text-align:right;">
+3740
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+367
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:right;">
+367
+</td>
+<td style="text-align:right;">
+368
+</td>
+<td style="text-align:right;">
+19.37988
+</td>
+<td style="text-align:right;">
+-99.17748
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+372
+</td>
+<td style="text-align:left;">
+DR. ROBERTO GAYOL-TLACOQUEMECATL
+</td>
+<td style="text-align:right;">
+3104
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+373
+</td>
+<td style="text-align:right;">
+378
+</td>
+<td style="text-align:right;">
+379
+</td>
+<td style="text-align:right;">
+373
+</td>
+<td style="text-align:right;">
+19.37797
+</td>
+<td style="text-align:right;">
+-99.17029
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+379
+</td>
+<td style="text-align:left;">
+DR. ROBERTO GAYOL-MIGUEL LAURENT
+</td>
+<td style="text-align:right;">
+3104
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+378
+</td>
+<td style="text-align:right;">
+380
+</td>
+<td style="text-align:right;">
+395
+</td>
+<td style="text-align:right;">
+378
+</td>
+<td style="text-align:right;">
+19.37575
+</td>
+<td style="text-align:right;">
+-99.17084
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+402
+</td>
+<td style="text-align:left;">
+UXMAL-MUNICIPIO LIBRE
+</td>
+<td style="text-align:right;">
+3310
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+401
+</td>
+<td style="text-align:right;">
+403
+</td>
+<td style="text-align:right;">
+405
+</td>
+<td style="text-align:right;">
+401
+</td>
+<td style="text-align:right;">
+19.37095
+</td>
+<td style="text-align:right;">
+-99.15872
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+REFORMA-INSURGENTES
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+86
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+19.43165
+</td>
+<td style="text-align:right;">
+-99.15867
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:left;">
+RIO LERMA-VILLALONGIN
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+19.43231
+</td>
+<td style="text-align:right;">
+-99.16160
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:left;">
+REFORMA-RIO RODANO
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+19.42378
+</td>
+<td style="text-align:right;">
+-99.17556
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:left;">
+REFORMA-RIO GUADALQUIVIR
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+19.42653
+</td>
+<td style="text-align:right;">
+-99.16916
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:left;">
+REFORMA-RIO TIBER
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Ampliación Granada
+</td>
+<td style="text-align:left;">
+BIKE,TPV
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+19.42750
+</td>
+<td style="text-align:right;">
+-99.16712
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>
+</p>
+</div>
+<div id="a-donde-van-los-ciclistas" class="section level1">
+<h1>¿A dónde van los ciclistas?</h1>
+<p>
+Con base en esta base de datos puedo relacionar las estaciones de retiro (donde toman las bicis) con sus respectivas coordenadas y se puede hacer los mismo para las estaciones de llegada (Donde dejan las bicis). Con esta relación me percaté que existían retiros y llegadas en la misma estación. Solo me interesa el movimiento entre estaciones, por lo que procedí a eliminar los usos sin cambio de estación. En el resto de las rutas, muchas contaban con solo uno o dos viajes, por lo que decidí usar las rutas más concurridas y que acumularan el 90% de los viajes. De esta forma me quedé con 49,189 rutas distintas entre 452 estaciones… <strong>¡49,189 rutas distintas!</strong>
+</p>
+<p>
+El servicio gratuito de Google para calcular las rutas solo te permite realizar 2,000 solicitudes por día y, si quiero todas, ¡requeriría de más de 24 días para lograrlo! Pero por ahora me conformé con las rutas más concurridas y que acumulaban el 64.41% de los datos, que equivalen a <strong>535,523 viajes</strong>. También podría equivaler a mi paciencia de solicitar 2,000 rutas por día.
+</p>
+<p>
+Los datos que obtuve de las rutas y de ecobici se pueden relacionar y, para mi agrado, analizar cómo esperaba. Así, un ejemplo de lo que se puede hacer conociendo el lugar y la hora de donde retiran y dejan una bicicleta, la distancia, además de la demografía de los usuarios, podemos conocer que rutas y vialidades son las más concurridas, y la velocidad de los usuarios por edad, género y a distintas horas del día:
+</p>
+<div class="figure">
+<img src="/img/uso_eco_2fps.gif" />
+
+</div>
+<p>
+</p>
+<p>
+El GIF muestra una sumatoria de todo el mes a distintas horas. Se puede ver que las velocidades por las mañanas son mejores y decrecen a eso de las 11:00 am, con pocos usuarios durante la noche. También hay más variabilidad en las velocidades entre los 20 y los 40 años, que es el intervalo que más usuarios tiene, y parece que los más veloces rondan los 30’s. Es muy notorio que la mayoría de los que usan el servicio son del género masculino, que son los azules. También, las rutas probables más usadas se pueden ver que cruzan av. Reforma y las calles de la Condesa.
+</p>
+<p>
+La resolución que se puede alcanzar puede ser de un día a cierta hora, o un intervalo de días a un intervalo de horas específico, y seleccionando un intervalo de edades. Por ello, para que cualquiera pueda explorar la dinámica del servicio de Ecobici durante el mes de junio, implementé una aplicación <code>Shiny</code> que permite interactuar con ellos y que puedes acceder en <a href="https://datapach.shinyapps.io/rutas_ecobici_jun2017/"><strong>esta liga</strong></a>
+</p>
+<img src="/img/ecobici_app.jpg" />
+<p>
+</p>
+<p>
+Usando los datos que generan las ciudades, de la de mano de análisis y herramientas como estas, se podría generar una sociedad mucho más informada para la toma de decisiones, tanto a nivel gubernamental como en la sociedad civil. Además, este análisis se puede expandir para mejorar la eficiencia del servicio o focalizar el mantenimiento de las bicicletas, además de conocer factores que promuevan la adaptación de la bicicleta como eje de transporte de una ciudad.
+</p>
+</div>
